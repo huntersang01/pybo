@@ -14,9 +14,13 @@
         {% if question_list %}<!-- 템플릿 태그 if문-->
         {% for question in question_list.items %} <!--question_list를 반복하여 순차적으로 하나씩 question에대입-->
         <tr>
-            <td>{{ loop.index }}</td><!--for문의 현재 순서 의미 td로 셀추가-->
+            <td>{{ question_list.total - ((question_list.page-1) * question_list.per_page) - loop.index0 }}</td>
+            <!--게시물 번호 추가/ 번호 = 전체건수 - (현재페이지-1) * 페이지당건수 - 나열인덱스-->
             <td>
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
+                {% if question.answer_set|length >0 %}
+                <span class="text-danger small ml-2">{{question.answer_set|length}}</span>
+                {% endif %}
             </td>
             <td>{{ question.create_date|datetime }}</td>
         </tr>
