@@ -1,0 +1,12 @@
+<!--필드오류(폼 validators검증 오류)-->
+{% for field, errors in form.errors.items() %}
+<div class="alert alert-danger" rold="alret">
+    <strong>{{ form[field].label }}</strong>: {{','.join(errors) }}
+</div>
+{% endfor %}
+<!-- flash오류 로직오류 -->
+{% for message in get_flashed_messages() %}
+<div class="alret alret-danger" role="alert">
+    {{ message }}
+</div>
+{% endfor %}
