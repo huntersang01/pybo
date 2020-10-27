@@ -3,9 +3,17 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 #ORM 라이브러리 참조 DB접속할때 테이플과 매핑된 모델객체를 통해 데이터 처리
+from sqlalchemy import MetaData
 import config
 
-db = SQLAlchemy()#ORM라이브러리
+naming_convention = {
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(column_0_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))#ORM라이브러리
 migrate = Migrate()#db 모델을통해 데이터 변경 도와주는 라이브러리
 #db 관리 명령
 #flask db migrate 모델 신규생성,변경
@@ -16,7 +24,10 @@ def create_app():
     app.config.from_object(config)
     #ORM
     db.init_app(app)
-    migrate.init_app(app, db)
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith("sqlite"):
+        migrate.init_app(app, db, render_as_batch=True)
+    else:
+        migrate.init_app(app, db)
     
     from . import models
     #블루프린트
