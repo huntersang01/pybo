@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, url_for
+from pybo.views.auth_views import login_required
 from werkzeug.utils import redirect
 
 from .. import db
@@ -26,12 +27,13 @@ def detail(question_id):
     return render_template('question/question_detail.html', question=question, form=form)
 
 @bp.route('/create/',methods=('GET','POST'))
+@login_required
 def create():
     form = QuestionForm()
     if request.method == 'POST' and form.validate_on_submit():
         #request.method는 현재 요청된 전송방식 의미,form.validate_on_submit()는 post로 전송된 폼데이터 정합성 체크
         question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now()
-        . user=g.user)
+        , user=g.user)
         db.session.add(question)
         db.session.commit()
         return redirect(url_for('main.index'))

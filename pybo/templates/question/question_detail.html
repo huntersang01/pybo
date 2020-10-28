@@ -34,7 +34,8 @@
             </div>
             {% endfor %}
             <div class="form-group">
-                <textarea name="content" id="content" class="form-control" rows="15"></textarea>
+                <textarea {% if not g.user %} disabled {% endif %}
+                         name="content" id="content" class="form-control" rows="10"></textarea>
             </div>
             <input type="submit" value="답변등록" class="btn btn-primary">
     </form><!--form을 이용하여 텍스트 에리어에 내용을 submit 버튼을 통해 post방식으로 answer.view로 넘김 -->

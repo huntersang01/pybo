@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, url_for,request, render_template, g
+from pybo.views.auth_views import login_required
 from werkzeug.utils import redirect
 
 from pybo import db
@@ -10,6 +11,7 @@ from ..models import Question, Answer
 bp = Blueprint('answer', __name__, url_prefix='/answer')
 
 @bp.route('/create/<int:question_id>', methods=('POST',))#post방식으로 전달받음
+@login_required
 def create(question_id):
     form =AnswerForm()
     question = Question.query.get_or_404(question_id)
