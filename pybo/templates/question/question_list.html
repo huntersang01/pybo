@@ -4,24 +4,26 @@
 <div class="container my-3">
     <table class="table"><!--도표 추가-->
         <thead><!--행 제목 그룹화-->
-        <tr class="thead-dark">
+        <tr class="text-center thead-dark">
             <th>번호</th><!--tr로 행만든후 th는요소추가 -->
-            <th>제목</th>
+            <th style="width:50%">제목</th>
+            <th>글쓴이</th>
             <th>작성일시</th>
         </tr>
         </thead>
         <tbody><!--도표 본문 해당 행 그룹화-->
         {% if question_list %}<!-- 템플릿 태그 if문-->
         {% for question in question_list.items %} <!--question_list를 반복하여 순차적으로 하나씩 question에대입-->
-        <tr>
+        <tr class="text-center"> 
             <td>{{ question_list.total - ((question_list.page-1) * question_list.per_page) - loop.index0 }}</td>
             <!--게시물 번호 추가/ 번호 = 전체건수 - (현재페이지-1) * 페이지당건수 - 나열인덱스-->
-            <td>
+            <td class="text-left">
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {% if question.answer_set|length >0 %}
                 <span class="text-danger small ml-2">{{question.answer_set|length}}</span>
                 {% endif %}
             </td>
+            <td>{{ question.user.username}}</td>
             <td>{{ question.create_date|datetime }}</td>
         </tr>
         {% endfor %}

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, url_for
+from flask import Blueprint, render_template, request, url_for ,g, flash
 from pybo.views.auth_views import login_required
 from werkzeug.utils import redirect
 
@@ -38,3 +38,24 @@ def create():
         db.session.commit()
         return redirect(url_for('main.index'))
     return render_template('question/question_form.html', form=form)
+
+@bp.route('/modify/<int:question_id>', methods=('GET','POST'))
+@login_required
+def modify(question_id):
+    question = Question.query.get_or_404(question_id)
+    if g.user != question.user:
+        flash('수정권한이 없습니다')
+        return redirect(url_for('question.detail',question_id=question_id))
+  #질문수정을 누르면 get 방식으로 돼서 question_form.html을 렌더링 
+  # 질문수정 화면에서 저장하기 누르면 post방식으로 밑의 함수실행
+    if request.method == 'POST': 
+        form = QuestionForm()
+        if form.validate_on_submit():
+            form.populate_obj(question)
+            question.modify_date = datetime.now()
+            db.session.commit()
+            return redirect(url_for('question.detail', question_id=question_id))
+    else:
+        form = QuestionForm(obj=question) #question객체의 제목과 내용을 QuestionForm에게 전달
+    return render_template('question/question_form.html',form=form)
+

@@ -6,7 +6,7 @@ class Question(db.Model):#nullable 비어있는값 들어올수없음 의미 디
     subject = db.Column(db.String(200), nullable=False)#string제목처럼 제한된 글자수
     content = db.Column(db.Text(), nullable=False)#text글자수 제한 없음
     create_date = db.Column(db.DateTime(), nullable=False)#날짜와 시간
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
     user = db.relationship('User', backref=db.backref('question_set'))
     #backref속성은 계정에서 질문을 참조하기위해 사용하는 속성
 
@@ -19,7 +19,7 @@ class Answer(db.Model):
     #backref속성은 질문에서 답변모델을 참조하기위해서 사용 
     content = db.Column(db.Text(), nullable=False)
     create_date = db.Column(db.DateTime(), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
     user = db.relationship('User', backref=db.backref('answer_set'))
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
