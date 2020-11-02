@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, url_for,request, render_template, g
+from flask import Blueprint, url_for,request, render_template, g, flash
 from pybo.views.auth_views import login_required
 from werkzeug.utils import redirect
 
@@ -23,3 +23,6 @@ def create(question_id):
         return redirect(url_for('question.detail', question_id=question_id))#답변생성후 상세조회 페이지로 이동
     return render_template('question/question_detail.html', question=question, form=form)
 
+
+@bp.route('/modify/<int:answer_id>', methods=('GET', 'POST'))
+@login_required
