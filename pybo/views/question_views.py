@@ -3,9 +3,10 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, url_for ,g, flash
 from pybo.views.auth_views import login_required
 from werkzeug.utils import redirect
+from sqlalchemy import func
 
 from .. import db
-from ..models import Question, Answer, User
+from ..models import Question, Answer, User, question_voter
 from ..forms import QuestionForm, AnswerForm
 bp = Blueprint('question', __name__, url_prefix='/quesiton')
 
@@ -16,9 +17,24 @@ def _list():
     # 입력 파라미터
     page = request.args.get('page', type=int, default=1) #페이지 get방식으로 요청한 url에서 page값 가져올때 사용
     kw = request.args.get('kw', type=str, default='')
+    so = request.args.get('so', type=str, default='recent')
 
+    # 정렬
+    if so == 'recommend':
+        sub_query = db.session.query(question_voter.c.question_id, func.count('*').label('num_voter')) \
+            .group_by(question_voter.c.question_id).subquery()
+        question_list = Question.query \
+            .outerjoin(sub_query, Question.id == sub_query.c.question_id) \
+            .order_by(sub_query.c.num_voter.desc(), Question.create_date.desc())
+    elif so == 'popular':
+        sub_query = db.session.query(Answer.question_id, func.count('*').label('num_answer')) \
+            .group_by(Answer.question_id).subquery()
+        question_list = Question.query \
+            .outerjoin(sub_query, Question.id == sub_query.c.question_id) \
+            .order_by(sub_query.c.num_answer.desc(), Question.create_date.desc())
+    else:  # recent
+        question_list = Question.query.order_by(Question.create_date.desc())
     # 조회
-    question_list = Question.query.order_by(Question.create_date.desc())
      #order_by는 조회결과를 정렬하는 함수 Question.create_date.desc()는 조회된 데이터를 작성일시 기준으로 역순정렬
     if kw:
 
@@ -26,8 +42,8 @@ def _list():
         sub_query = db.session.query(Answer.question_id, Answer.content, User.username) \
             .join(User, Answer.user_id == User.id).subquery()
         question_list = question_list \
-            .join(User) \             
-            .outerjoin(sub_query, sub_query.c.question_id == Question.id) \            
+            .join(User) \
+            .outerjoin(sub_query, sub_query.c.question_id == Question.id) \
             .filter(Question.subject.ilike(search) |  # 질문제목
                     Question.content.ilike(search) |  # 질문내용
                     User.username.ilike(search) |  # 질문작성자
@@ -36,8 +52,8 @@ def _list():
                     ) \
             .distinct()
     question_list = question_list.paginate(page, per_page=10)
-    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw)
-        #question/question_list.html 파일을 템플릿 파일이라 부름 템플릿파일을 화면으로 렌더링해줌
+    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw, so=so)
+    #question/question_list.html 파일을 템플릿 파일이라 부름 템플릿파일을 화면으로 렌더링해줌
 
 @bp.route('/detail/<int:question_id>/')
 def detail(question_id):
